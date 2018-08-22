@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "create-react-app-parcel-typescript": "0.0.5",
+    "firebase": "^5.4.0",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
     "react-router-dom": "^4.3.1",
