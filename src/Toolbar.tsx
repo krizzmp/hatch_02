@@ -13,11 +13,13 @@ const styles = {
   Left: styled("div")`
     display: flex;
     align-items: center;
+    margin: 8px;
   `,
   Middle: styled("div")`
     display: flex;
     flex: 1;
     align-items: center;
+    margin: 8px;
   `,
 };
 interface $Toolbar {

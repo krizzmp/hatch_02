@@ -5,6 +5,15 @@ const styles = {
   PopOver: styled("div")`
     position: absolute;
     top: 64px;
+    right: 0;
+    background: #c0ffee;
+    padding: 8px;
+  `,
+  img: styled("img")`
+    border-radius: 48px;
+    height: 48px;
+    width: 48px;
+    margin: 8px;
   `,
 };
 export const UserMenu = ({ user, signOut }) => {
@@ -12,13 +21,7 @@ export const UserMenu = ({ user, signOut }) => {
     <Toggle initial={true}>
       {({ on, toggle }) => (
         <React.Fragment>
-          <img
-            onClick={toggle}
-            height={48}
-            width={48}
-            style={{ borderRadius: 48 }}
-            src={user.photoURL}
-          />
+          <styles.img onClick={toggle} src={user.photoURL} />
           {on ? (
             <styles.PopOver>
               <button onClick={signOut}>sign out</button>

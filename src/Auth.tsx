@@ -2,7 +2,7 @@ import firebase from "firebase";
 import { app } from "./firebase-init";
 import React from "react";
 var provider = new firebase.auth.GoogleAuthProvider();
-interface RenderProps<T> {
+export interface RenderProps<T> {
   children: ((props: T) => React.ReactNode);
 }
 type $Auth = RenderProps<{
