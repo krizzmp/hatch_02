@@ -75,7 +75,15 @@ interface $Document {
     MoveDelta: (
       p: { id: string; dx: number; dy: number; projectId: string },
     ) => void;
+    UpdateNoteSize: (
+      p: {
+        id: string;
+        h: number;
+        w: number;
+      },
+    ) => void;
   };
+  localBoxById: { [id: string]: { h: number; w: number; isNew: boolean } };
 }
 export class Document2 extends React.Component<$Document> {
   state = {
@@ -94,8 +102,8 @@ export class Document2 extends React.Component<$Document> {
         b2={this.props.todosRaw[line.b2]}
         linesRaw={this.props.linesRaw}
         todosRaw={this.props.todosRaw}
-        localBox1={{ h: 30, w: 150 }}
-        localBox2={{ h: 30, w: 150 }}
+        localBox1={this.props.localBoxById[line.b1] || { h: 0, w: 0 }}
+        localBox2={this.props.localBoxById[line.b2] || { h: 0, w: 0 }}
       />
     ));
   };
@@ -109,10 +117,10 @@ export class Document2 extends React.Component<$Document> {
         selected={this.props.selected === todo.id}
         select={this.select}
         projectId={this.props.id}
-        localBox={{ h: 30, w: 128, isNew: false }}
+        localBox={{ ...this.props.localBoxById[todo.id] }}
         actions={{
-          UpdateNoteSize: () => {},
-          CreateNote: () => {},
+          UpdateNoteSize: this.props.actions.UpdateNoteSize,
+          CreateNote: this.props.actions.CreateNote,
           RemoveNote: () => {},
           UpdateNoteText: () => {},
         }}
@@ -213,14 +221,21 @@ type fbDocument = {
 };
 type fbState = {
   document: fbDocument;
+  localBoxById: { [id: string]: { w: number; h: number; isNew: boolean } };
 };
-type $FbDocuments = { docId: string } & RenderProps<fbDocument>;
+type $FbDocuments = { docId: string } & RenderProps<
+  fbDocument & {
+    localBoxById: { [id: string]: { w: number; h: number; isNew: boolean } };
+    updateLocalBox: Function;
+  }
+>;
 class FbDocuments extends React.Component<$FbDocuments> {
   state: fbState = {
     document: {
       lines: null,
       todos: null,
     },
+    localBoxById: {},
   };
   t: firebase.database.Reference;
   componentWillMount = () => {
@@ -233,16 +248,42 @@ class FbDocuments extends React.Component<$FbDocuments> {
   componentWillUnmount = () => {
     this.t.off();
   };
-
+  updateLocalBox = (fn) => {
+    this.setState(fn);
+  };
   render() {
-    return this.props.children(this.state.document);
+    return this.props.children({
+      ...this.state.document,
+      localBoxById: this.state.localBoxById,
+      updateLocalBox: this.updateLocalBox,
+    });
   }
 }
-export const Document = (p) => (
+export const Document = (p: { id: string }) => (
   <FbDocuments docId={p.id}>
-    {({ lines, todos }) =>
+    {({ lines, todos, localBoxById, updateLocalBox }) =>
       !!lines && !!todos ? (
-        <Document2 {...p} linesRaw={lines} todosRaw={todos} />
+        <Document2
+          selected=""
+          id={p.id}
+          localBoxById={localBoxById}
+          actions={{
+            ConnectNote: () => {},
+            CreateNote: () => {},
+            DisconnectLine: () => {},
+            MoveDelta: () => {},
+            MoveNote: () => {},
+            SelectNote: () => {},
+            UpdateNoteSize: ({ id, h, w }) => {
+              updateLocalBox((s) => ({
+                ...s,
+                localBoxById: { ...s.localBoxById, [id]: { h, w } },
+              }));
+            },
+          }}
+          linesRaw={lines}
+          todosRaw={todos}
+        />
       ) : null
     }
   </FbDocuments>

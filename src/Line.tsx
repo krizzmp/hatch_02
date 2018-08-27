@@ -97,7 +97,6 @@ function srtx<
 function notNull<T>(cat: T): cat is Exclude<typeof cat, undefined | null> {
   return cat !== null && cat !== undefined;
 }
-// const Line = (p: $Line) => <div />;
 export class Line extends React.Component<$Line> {
   private gap = 8;
   private getBoxes = () => {

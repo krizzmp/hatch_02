@@ -88,25 +88,7 @@ const Home = ({ user, signOut }: $Home) => (
     />
     <Route
       path="/documents/:id"
-      component={(p) => (
-        <Document
-          id={p.match.params.id}
-          linesRaw={{ l1: { b1: "n1", b2: "n2", id: "l1" } }}
-          todosRaw={{
-            n1: { id: "n1", name: "n1", x: -10, y: -10, dx: 0, dy: 0 },
-            n2: { id: "n2", name: "n2", x: 10, y: 100, dx: 0, dy: 0 },
-          }}
-          selected={""}
-          actions={{
-            ConnectNote: () => {},
-            CreateNote: () => {},
-            DisconnectLine: () => {},
-            MoveDelta: () => {},
-            MoveNote: () => {},
-            SelectNote: () => {},
-          }}
-        />
-      )}
+      component={(p) => <Document id={p.match.params.id} />}
     />
   </div>
 );

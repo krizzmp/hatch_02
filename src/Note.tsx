@@ -294,11 +294,11 @@ export class Note extends React.Component<BoxProps & TodoProps> {
 
   updateSize = () => {
     const { width, height } = this.bs!.getBoundingClientRect();
-
     const shouldUpdateSize = R.anyPass([
       R.complement(R.pathEq(["localBox", "w"], width)),
       R.complement(R.pathEq(["localBox", "h"], width)),
     ])(this.props);
+
     if (shouldUpdateSize) {
       this.props.actions.UpdateNoteSize({
         id: this.props.todo.id,
