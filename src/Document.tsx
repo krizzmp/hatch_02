@@ -1,11 +1,13 @@
 import * as React from "react";
-import styled from "react-emotion";
+import styled, { css } from "react-emotion";
 import { ofValues } from "ix/iterable/ofvalues";
 import * as Ix from "ix";
 import { Line, getConnectedLine } from "./Line";
 import { Note } from "./Note";
 import { RenderProps } from "./Auth";
 import { app } from "./firebase-init";
+import * as R from "ramda";
+import { HotKeys } from "react-hotkeys";
 let cuid = require("cuid");
 const styles = {
   Canvas: styled("div")`
@@ -82,6 +84,19 @@ interface $Document {
         w: number;
       },
     ) => void;
+    UpdateNoteText: (
+      p: {
+        id: string;
+        name: string;
+        projectId: string;
+      },
+    ) => void;
+    RemoveNote: (
+      p: {
+        id: string;
+        projectId: string;
+      },
+    ) => void;
   };
   localBoxById: { [id: string]: { h: number; w: number; isNew: boolean } };
 }
@@ -121,8 +136,8 @@ export class Document2 extends React.Component<$Document> {
         actions={{
           UpdateNoteSize: this.props.actions.UpdateNoteSize,
           CreateNote: this.props.actions.CreateNote,
-          RemoveNote: () => {},
-          UpdateNoteText: () => {},
+          RemoveNote: this.props.actions.RemoveNote,
+          UpdateNoteText: this.props.actions.UpdateNoteText,
         }}
       />
     ));
@@ -165,6 +180,7 @@ export class Document2 extends React.Component<$Document> {
   };
 
   select = (id: string) => {
+    console.log(id);
     this.props.actions.SelectNote({ id });
   };
   createTodo = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -196,22 +212,29 @@ export class Document2 extends React.Component<$Document> {
   };
   render() {
     return (
-      <styles.Canvas
-        onWheel={this.pan}
-        onMouseMove={this.onMouseMove}
-        onDoubleClick={this.createTodo}
-        onClick={() => this.select("")}
-        onMouseUp={this.onDragEnd}
+      <HotKeys
+        keyMap={{ remove: "del", shiftie: "shift+return" }}
+        {...{
+          className: css({ flex: 1, display: "flex" }),
+        } as any}
       >
-        <styles.Center
-          innerRef={(ref) => (this.$center = ref)}
-          dy={this.state.dy}
-          dx={this.state.dx}
+        <styles.Canvas
+          onWheel={this.pan}
+          onMouseMove={this.onMouseMove}
+          onDoubleClick={this.createTodo}
+          onClick={() => this.select("")}
+          onMouseUp={this.onDragEnd}
         >
-          {this.Lines()}
-          {this.Notes()}
-        </styles.Center>
-      </styles.Canvas>
+          <styles.Center
+            innerRef={(ref) => (this.$center = ref)}
+            dy={this.state.dy}
+            dx={this.state.dx}
+          >
+            {this.Lines()}
+            {this.Notes()}
+          </styles.Center>
+        </styles.Canvas>
+      </HotKeys>
     );
   }
 }
@@ -222,20 +245,44 @@ type fbDocument = {
 type fbState = {
   document: fbDocument;
   localBoxById: { [id: string]: { w: number; h: number; isNew: boolean } };
+  selected: string;
 };
 type $FbDocuments = { docId: string } & RenderProps<
   fbDocument & {
     localBoxById: { [id: string]: { w: number; h: number; isNew: boolean } };
-    updateLocalBox: Function;
+    selected: string;
+    UpdateNoteSize: (p: { id: string; h: number; w: number }) => void;
+    CreateNote: (p: { id: string; x: number; y: number }) => void;
+    SelectNote: (p: { id: string }) => void;
+    MoveDelta: (p: { id: string; dx: number; dy: number }) => void;
+    ConnectNote: (p: { b1: string; b2: string }) => void;
+    DisconnectLine: (p: { lineId: string; noteId: string }) => void;
+    MoveNote: (
+      p: { id: string; x: number; y: number; dx: number; dy: number },
+    ) => void;
+    UpdateNoteText: (
+      p: {
+        id: string;
+        name: string;
+        projectId: string;
+      },
+    ) => void;
+    RemoveNote: (
+      p: {
+        id: string;
+        projectId: string;
+      },
+    ) => void;
   }
 >;
-class FbDocuments extends React.Component<$FbDocuments> {
-  state: fbState = {
+class FbDocuments extends React.Component<$FbDocuments, fbState> {
+  state = {
     document: {
       lines: null,
       todos: null,
     },
     localBoxById: {},
+    selected: "",
   };
   t: firebase.database.Reference;
   componentWillMount = () => {
@@ -248,38 +295,142 @@ class FbDocuments extends React.Component<$FbDocuments> {
   componentWillUnmount = () => {
     this.t.off();
   };
-  updateLocalBox = (fn) => {
-    this.setState(fn);
+  updateLocalBox = ({ id, h, w }) => {
+    this.setState((s) => ({
+      ...s,
+      localBoxById: { ...s.localBoxById, [id]: { h, w } },
+    }));
+  };
+  CreateNote: (p: { id: string; x: number; y: number }) => void = ({
+    id,
+    x,
+    y,
+  }) => {
+    app
+      .database()
+      .ref(`${this.props.docId}/todos/${id}`)
+      .set({
+        id,
+        name: "new note",
+        x,
+        y,
+        dx: 0,
+        dy: 0,
+      });
+  };
+  MoveDelta = ({ id, dx, dy }) => {
+    app
+      .database()
+      .ref(`${this.props.docId}/todos/${id}`)
+      .update({
+        dx,
+        dy,
+      });
+  };
+  MoveNote = ({ id, x, y, dx, dy }) => {
+    app
+      .database()
+      .ref(`${this.props.docId}/todos/${id}`)
+      .update({
+        x: x + dx,
+        y: y + dy,
+        dx: 0,
+        dy: 0,
+      });
+  };
+  ConnectNote = ({ b1, b2 }) => {
+    let newLine = { id: cuid(), b1, b2 };
+    app
+      .database()
+      .ref(`${this.props.docId}/lines/${newLine.id}`)
+      .set(newLine);
+    app
+      .database()
+      .ref(`${this.props.docId}/todos/${b2}`)
+      .update({ dx: 0, dy: 0 });
+  };
+  DisconnectLine = ({ lineId, noteId }) => {
+    app
+      .database()
+      .ref(`${this.props.docId}/lines/${lineId}`)
+      .remove();
+    app
+      .database()
+      .ref(`${this.props.docId}/todos/${noteId}`)
+      .update({ dx: 0, dy: 0 });
+  };
+  RemoveNote = ({ id: noteId }) => {
+    let lines: { [id: string]: LineType } = this.state.document.lines;
+    Ix.Iterable.from(ofValues(lines))
+      .filter((line) => line.b1 === noteId || line.b2 === noteId)
+      .forEach((line) => {
+        app
+          .database()
+          .ref(`${this.props.docId}/lines/${line.id}`)
+          .remove();
+      });
+    app
+      .database()
+      .ref(`${this.props.docId}/todos/${noteId}`)
+      .remove();
+  };
+  UpdateNoteText = ({ name, id }) => {
+    app
+      .database()
+      .ref(`${this.props.docId}/todos/${id}`)
+      .update({ name });
   };
   render() {
     return this.props.children({
       ...this.state.document,
+      selected: this.state.selected,
       localBoxById: this.state.localBoxById,
-      updateLocalBox: this.updateLocalBox,
+      UpdateNoteSize: this.updateLocalBox,
+      SelectNote: ({ id }) => {
+        this.setState({ selected: id });
+      },
+      CreateNote: this.CreateNote,
+      MoveDelta: this.MoveDelta,
+      MoveNote: this.MoveNote,
+      ConnectNote: this.ConnectNote,
+      DisconnectLine: this.DisconnectLine,
+      RemoveNote: this.RemoveNote,
+      UpdateNoteText: this.UpdateNoteText,
     });
   }
 }
 export const Document = (p: { id: string }) => (
   <FbDocuments docId={p.id}>
-    {({ lines, todos, localBoxById, updateLocalBox }) =>
+    {({
+      lines,
+      todos,
+      localBoxById,
+      UpdateNoteSize,
+      CreateNote,
+      SelectNote,
+      selected,
+      MoveDelta,
+      MoveNote,
+      ConnectNote,
+      DisconnectLine,
+      RemoveNote,
+      UpdateNoteText,
+    }) =>
       !!lines && !!todos ? (
         <Document2
-          selected=""
+          selected={selected}
           id={p.id}
           localBoxById={localBoxById}
           actions={{
-            ConnectNote: () => {},
-            CreateNote: () => {},
-            DisconnectLine: () => {},
-            MoveDelta: () => {},
-            MoveNote: () => {},
-            SelectNote: () => {},
-            UpdateNoteSize: ({ id, h, w }) => {
-              updateLocalBox((s) => ({
-                ...s,
-                localBoxById: { ...s.localBoxById, [id]: { h, w } },
-              }));
-            },
+            ConnectNote,
+            CreateNote,
+            DisconnectLine,
+            MoveDelta,
+            MoveNote,
+            SelectNote,
+            UpdateNoteSize,
+            RemoveNote,
+            UpdateNoteText,
           }}
           linesRaw={lines}
           todosRaw={todos}
