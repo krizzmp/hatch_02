@@ -6,7 +6,7 @@ import { Toolbar } from "./Toolbar";
 import { UserMenu } from "./UserMenu";
 import { app } from "./firebase-init";
 import { injectGlobal } from "emotion";
-
+import { Document } from "./Document";
 injectGlobal`
   * {
     box-sizing: border-box;
@@ -73,7 +73,25 @@ const Home = ({ user, signOut }: $Home) => (
     />
     <Route
       path="/documents/:id"
-      component={(p) => <div>{p.match.params.id}</div>}
+      component={(p) => (
+        <Document
+          id={p.match.params.id}
+          linesRaw={{ l1: { b1: "n1", b2: "n2", id: "l1" } }}
+          todosRaw={{
+            n1: { id: "n1", name: "n1", x: 0, y: 0, dx: 0, dy: 0 },
+            n2: { id: "n2", name: "n2", x: 0, y: 0, dx: 0, dy: 0 },
+          }}
+          selected={""}
+          actions={{
+            ConnectNote: () => {},
+            CreateNote: () => {},
+            DisconnectLine: () => {},
+            MoveDelta: () => {},
+            MoveNote: () => {},
+            SelectNote: () => {},
+          }}
+        />
+      )}
     />
   </div>
 );
