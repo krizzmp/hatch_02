@@ -15,6 +15,21 @@ injectGlobal`
     margin: 0;
     padding: 0;
   }
+  body {
+  margin: 0;
+  padding: 0;
+  font-family: Menlo, Monaco, Consolas, "Lucida Console", monospace;
+
+}
+#root{
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+}
+div[tabindex="-1"]:focus {
+  outline: 0;
+}
 `;
 type $FbDocuments = { userId: string } & RenderProps<{
   documentsObj: { [id: string]: { name: string } };
@@ -50,7 +65,7 @@ interface $Home {
   signOut: () => void;
 }
 const Home = ({ user, signOut }: $Home) => (
-  <div>
+  <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
     <Toolbar
       left={<span>logo</span>}
       middle={<span>{user.displayName}</span>}
@@ -78,8 +93,8 @@ const Home = ({ user, signOut }: $Home) => (
           id={p.match.params.id}
           linesRaw={{ l1: { b1: "n1", b2: "n2", id: "l1" } }}
           todosRaw={{
-            n1: { id: "n1", name: "n1", x: 0, y: 0, dx: 0, dy: 0 },
-            n2: { id: "n2", name: "n2", x: 0, y: 0, dx: 0, dy: 0 },
+            n1: { id: "n1", name: "n1", x: -10, y: -10, dx: 0, dy: 0 },
+            n2: { id: "n2", name: "n2", x: 10, y: 100, dx: 0, dy: 0 },
           }}
           selected={""}
           actions={{

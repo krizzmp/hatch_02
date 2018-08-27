@@ -2,6 +2,7 @@ import * as React from "react";
 import styled from "react-emotion";
 import { ofValues } from "ix/iterable/ofvalues";
 import * as Ix from "ix";
+import { Line } from "./Line";
 let cuid = require("cuid");
 const styles = {
   Canvas: styled("div")`
@@ -11,7 +12,7 @@ const styles = {
     flex: 1;
     background-color: #eeeeee;
   `,
-  Center: styled("img")`
+  Center: styled("div")`
     left: 50%;
     top: 50%;
     position: relative;
@@ -20,7 +21,7 @@ const styles = {
   `,
 };
 
-interface TodoType {
+export interface TodoType {
   id: string;
   x: number;
   y: number;
@@ -28,24 +29,11 @@ interface TodoType {
   dy: number;
   name: string;
 }
-interface LineType {
+export interface LineType {
   id: string;
   b1: string;
   b2: string;
 }
-function getConnectedLine(
-  lines: { [id: string]: LineType },
-  b1: string,
-  b2: string,
-) {
-  let isConnected = (line: LineType) =>
-    (line.b1 === b1 && line.b2 === b2) || (line.b1 === b2 && line.b2 === b1);
-  let g = Ix.Iterable.from(ofValues(lines))
-    .filter(isConnected)
-    .first();
-  return g;
-}
-const Line = (p: any) => <div />;
 const Note = (p: any) => <div />;
 interface $Document {
   id: string;
@@ -95,7 +83,7 @@ export class Document extends React.Component<$Document> {
   };
   $center?: Element;
   Lines = () => {
-    Ix.Iterable.from(ofValues(this.props.linesRaw)).map((line) => (
+    return Ix.Iterable.from(ofValues(this.props.linesRaw)).map((line) => (
       <Line
         key={line.id}
         id={line.id}
@@ -103,6 +91,8 @@ export class Document extends React.Component<$Document> {
         b2={this.props.todosRaw[line.b2]}
         linesRaw={this.props.linesRaw}
         todosRaw={this.props.todosRaw}
+        localBox1={{ h: 30, w: 150 }}
+        localBox2={{ h: 30, w: 150 }}
       />
     ));
   };
@@ -187,7 +177,6 @@ export class Document extends React.Component<$Document> {
     });
   };
   render() {
-    const { children } = this.props;
     return (
       <styles.Canvas
         onWheel={this.pan}
@@ -201,7 +190,8 @@ export class Document extends React.Component<$Document> {
           dy={this.state.dy}
           dx={this.state.dx}
         >
-          {children}
+          {this.Lines()}
+          {this.Notes()}
         </styles.Center>
       </styles.Canvas>
     );

@@ -6,8 +6,11 @@ const styles = {
     position: absolute;
     top: 64px;
     right: 0;
-    background: #c0ffee;
-    padding: 8px;
+    background: #a6a6a6;
+    padding: 16px;
+    z-index: 10;
+    margin: 4px;
+    border-radius: 4px;
   `,
   img: styled("img")`
     border-radius: 48px;
@@ -15,16 +18,20 @@ const styles = {
     width: 48px;
     margin: 8px;
   `,
+  signOut: styled("button")`
+    height: 32px;
+    width: 128px;
+  `,
 };
 export const UserMenu = ({ user, signOut }) => {
   return (
-    <Toggle initial={true}>
+    <Toggle initial={false}>
       {({ on, toggle }) => (
         <React.Fragment>
           <styles.img onClick={toggle} src={user.photoURL} />
           {on ? (
             <styles.PopOver>
-              <button onClick={signOut}>sign out</button>
+              <styles.signOut onClick={signOut}>sign out</styles.signOut>
             </styles.PopOver>
           ) : null}
         </React.Fragment>
