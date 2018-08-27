@@ -3,6 +3,7 @@ import styled from "react-emotion";
 import { ofValues } from "ix/iterable/ofvalues";
 import { LineType, TodoType } from "./Document";
 import * as Ix from "ix";
+import { colors } from "./colors";
 
 export function getConnectedLine(
   lines: {
@@ -96,11 +97,6 @@ function srtx<
 function notNull<T>(cat: T): cat is Exclude<typeof cat, undefined | null> {
   return cat !== null && cat !== undefined;
 }
-const colors = {
-  noteText: "#797979",
-  noteBorder: "#8c8c8c",
-  noteBg: "#E6E6E6",
-};
 // const Line = (p: $Line) => <div />;
 export class Line extends React.Component<$Line> {
   private gap = 8;

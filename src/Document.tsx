@@ -2,7 +2,10 @@ import * as React from "react";
 import styled from "react-emotion";
 import { ofValues } from "ix/iterable/ofvalues";
 import * as Ix from "ix";
-import { Line } from "./Line";
+import { Line, getConnectedLine } from "./Line";
+import { Note } from "./Note";
+import { RenderProps } from "./Auth";
+import { app } from "./firebase-init";
 let cuid = require("cuid");
 const styles = {
   Canvas: styled("div")`
@@ -34,7 +37,7 @@ export interface LineType {
   b1: string;
   b2: string;
 }
-const Note = (p: any) => <div />;
+
 interface $Document {
   id: string;
   linesRaw: { [id: string]: LineType };
@@ -74,7 +77,7 @@ interface $Document {
     ) => void;
   };
 }
-export class Document extends React.Component<$Document> {
+export class Document2 extends React.Component<$Document> {
   state = {
     dx: 0,
     dy: 0,
@@ -106,6 +109,13 @@ export class Document extends React.Component<$Document> {
         selected={this.props.selected === todo.id}
         select={this.select}
         projectId={this.props.id}
+        localBox={{ h: 30, w: 128, isNew: false }}
+        actions={{
+          UpdateNoteSize: () => {},
+          CreateNote: () => {},
+          RemoveNote: () => {},
+          UpdateNoteText: () => {},
+        }}
       />
     ));
   };
@@ -158,7 +168,7 @@ export class Document extends React.Component<$Document> {
     this.props.actions.CreateNote({ id: cuid(), x, y, projectId });
   };
   onMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (this.state.dragging && this.state.draggingInitPos) {
+    if (!!this.state.dragging && !!this.state.draggingInitPos) {
       const id = this.state.dragging.id;
       const dx = e.clientX - this.state.draggingInitPos.x;
       const dy = e.clientY - this.state.draggingInitPos.y;
@@ -197,3 +207,43 @@ export class Document extends React.Component<$Document> {
     );
   }
 }
+type fbDocument = {
+  todos: { [id: string]: TodoType };
+  lines: { [id: string]: LineType };
+};
+type fbState = {
+  document: fbDocument;
+};
+type $FbDocuments = { docId: string } & RenderProps<fbDocument>;
+class FbDocuments extends React.Component<$FbDocuments> {
+  state: fbState = {
+    document: {
+      lines: null,
+      todos: null,
+    },
+  };
+  t: firebase.database.Reference;
+  componentWillMount = () => {
+    this.t = app.database().ref(`${this.props.docId}`);
+    this.t.on("value", (snap) => {
+      this.setState({ document: snap.val() });
+    });
+  };
+
+  componentWillUnmount = () => {
+    this.t.off();
+  };
+
+  render() {
+    return this.props.children(this.state.document);
+  }
+}
+export const Document = (p) => (
+  <FbDocuments docId={p.id}>
+    {({ lines, todos }) =>
+      !!lines && !!todos ? (
+        <Document2 {...p} linesRaw={lines} todosRaw={todos} />
+      ) : null
+    }
+  </FbDocuments>
+);
