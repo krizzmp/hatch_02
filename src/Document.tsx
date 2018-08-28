@@ -180,7 +180,6 @@ export class Document2 extends React.Component<$Document> {
   };
 
   select = (id: string) => {
-    console.log(id);
     this.props.actions.SelectNote({ id });
   };
   createTodo = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -295,7 +294,7 @@ class FbDocuments extends React.Component<$FbDocuments, fbState> {
   componentWillUnmount = () => {
     this.t.off();
   };
-  updateLocalBox = ({ id, h, w }) => {
+  UpdateNoteSize = ({ id, h, w }) => {
     this.setState((s) => ({
       ...s,
       localBoxById: { ...s.localBoxById, [id]: { h, w } },
@@ -306,6 +305,16 @@ class FbDocuments extends React.Component<$FbDocuments, fbState> {
     x,
     y,
   }) => {
+    this.setState((s) =>
+      R.mergeDeepRight(s, {
+        selected: id,
+        localBoxById: {
+          [id]: {
+            isNew: true,
+          },
+        },
+      }),
+    );
     app
       .database()
       .ref(`${this.props.docId}/todos/${id}`)
@@ -379,16 +388,26 @@ class FbDocuments extends React.Component<$FbDocuments, fbState> {
       .database()
       .ref(`${this.props.docId}/todos/${id}`)
       .update({ name });
+    this.setState((s) =>
+      R.mergeDeepRight(s, {
+        localBoxById: {
+          [id]: {
+            isNew: false,
+          },
+        },
+      }),
+    );
+  };
+  SelectNote = ({ id }) => {
+    this.setState({ selected: id });
   };
   render() {
     return this.props.children({
       ...this.state.document,
       selected: this.state.selected,
       localBoxById: this.state.localBoxById,
-      UpdateNoteSize: this.updateLocalBox,
-      SelectNote: ({ id }) => {
-        this.setState({ selected: id });
-      },
+      UpdateNoteSize: this.UpdateNoteSize,
+      SelectNote: this.SelectNote,
       CreateNote: this.CreateNote,
       MoveDelta: this.MoveDelta,
       MoveNote: this.MoveNote,

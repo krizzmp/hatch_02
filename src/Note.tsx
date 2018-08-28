@@ -5,9 +5,7 @@ import { HotKeys } from "react-hotkeys";
 import Plain from "slate-plain-serializer";
 import { Editor } from "slate-react";
 import { TodoType } from "./Document";
-// import { DefaultText, InnerDivider, OuterDivider } from "../styles/EditorStyle";
 import { TodoStyle } from "./TodoStyles";
-import * as ReactDOM from "react-dom";
 import styled from "react-emotion";
 import { colors } from "./colors";
 
@@ -15,7 +13,6 @@ let cuid = require("cuid");
 const DefaultText = styled("div")(
   {
     paddingRight: "1.5ch",
-    // background: 'red'
   },
   ({ field, h1 }: { field: boolean; h1: boolean }) => ({
     paddingLeft: field || h1 ? "0.5ch" : "1.5ch",
@@ -138,24 +135,22 @@ class MyEditor extends React.Component<MeProps & BoxProps> {
       }
     },
     shiftie: () => {
+      this.props.select("");
       this.onBlur();
       this.props.createNoteBeneath();
     },
     esc: () => {
       this.props.select("");
-      this.editor!.blur();
+      this.onBlur();
     },
   };
-
   componentDidMount() {
-    if (this.props.localBox) {
-      this.editor!.focus();
-      setTimeout(() => {
-        let htmlElement = ReactDOM.findDOMNode(this
-          .editor! as any) as HTMLElement;
-        htmlElement.focus();
-        this.editor!.change((c) => c.deselect().flip());
-      }, 5);
+    if (this.props.localBox.isNew) {
+      this.setState({ editing: true }, () => {
+        setTimeout(() => {
+          this.editor!.change((c) => c.moveToRangeOfDocument().focus());
+        }, 0);
+      });
     }
   }
 
@@ -198,6 +193,7 @@ class MyEditor extends React.Component<MeProps & BoxProps> {
           className={css({
             paddingTop: "1.3ch",
             paddingBottom: "1.2ch",
+            zIndex: -1,
           })}
         />
       </HotKeys>
