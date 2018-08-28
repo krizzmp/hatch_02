@@ -1,65 +1,28 @@
 import * as React from "react";
-import { BrowserRouter, Route, Link } from "react-router-dom";
+import { BrowserRouter, Route } from "react-router-dom";
 import firebase from "firebase";
-import { Auth, RenderProps } from "./Auth";
+import { Auth } from "./Auth";
 import { Toolbar } from "./Toolbar";
 import { UserMenu } from "./UserMenu";
-import { app } from "./firebase-init";
-import { injectGlobal } from "emotion";
 import { Document } from "./Document";
-injectGlobal`
-  * {
-    box-sizing: border-box;
+import { State, Value } from "react-powerplug";
+import styled from "react-emotion";
+import "./globalStyles";
+import { Documents } from "./Documents";
+const Input = styled("input")`
+  height: 64px;
+  width: 100%;
+  border: none;
+  color: white;
+  font-size: 32px;
+  padding-left: 16px;
+  border-bottom: 1px solid transparent;
+  outline: none;
+  background: #2c4cc1;
+  &:focus {
+    border-bottom-color: #506fe2;
   }
-  body{
-    margin: 0;
-    padding: 0;
-  }
-  body {
-  margin: 0;
-  padding: 0;
-  font-family: Menlo, Monaco, Consolas, "Lucida Console", monospace;
-
-}
-#root{
-  height: 100vh;
-  width: 100vw;
-  display: flex;
-  flex-direction: column;
-}
-div[tabindex="-1"]:focus {
-  outline: 0;
-}
 `;
-type $FbDocuments = { userId: string } & RenderProps<{
-  documentsObj: { [id: string]: { name: string } };
-  documents: { key: string; value: { name: string } }[];
-}>;
-class FbDocuments extends React.Component<$FbDocuments> {
-  state = { documents: {} };
-  t: firebase.database.Reference;
-  componentWillMount = () => {
-    this.t = app.database().ref(`users/${this.props.userId}/documents`);
-    this.t.on("value", (snap) => {
-      this.setState({ documents: snap.val() });
-    });
-  };
-
-  componentWillUnmount = () => {
-    this.t.off();
-  };
-
-  render() {
-    return this.props.children({
-      documentsObj: this.state.documents,
-      documents: Object.keys(this.state.documents).map((k) => ({
-        key: k,
-        value: this.state.documents[k],
-      })),
-    });
-  }
-}
-
 interface $Home {
   user: firebase.User;
   signOut: () => void;
@@ -71,21 +34,7 @@ const Home = ({ user, signOut }: $Home) => (
       middle={<span>{user.displayName}</span>}
       right={<UserMenu user={user} signOut={signOut} />}
     />
-    <Route
-      exact
-      path="/"
-      component={() => (
-        <FbDocuments userId={user.uid}>
-          {({ documents }) =>
-            documents.map(({ key, value: { name } }) => (
-              <div>
-                <Link to={`/documents/${key}`}>{name}</Link>
-              </div>
-            ))
-          }
-        </FbDocuments>
-      )}
-    />
+    <Route exact path="/" component={() => <Documents user={user} />} />
     <Route
       path="/documents/:id"
       component={(p) => <Document id={p.match.params.id} />}
