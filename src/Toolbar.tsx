@@ -2,7 +2,7 @@ import * as React from "react";
 import styled from "react-emotion";
 const styles = {
   Toolbar: styled("div")`
-    background: turquoise;
+    background: #4062e0;
     display: flex;
     height: 64px;
   `,
