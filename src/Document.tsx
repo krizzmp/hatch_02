@@ -8,7 +8,7 @@ import { RenderProps } from "./Auth";
 import { app } from "./firebase-init";
 import * as R from "ramda";
 import { HotKeys } from "react-hotkeys";
-let cuid = require("cuid");
+import cuid from "cuid";
 const styles = {
   Canvas: styled("div")`
     overflow: hidden;
