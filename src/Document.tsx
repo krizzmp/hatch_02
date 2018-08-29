@@ -47,19 +47,9 @@ interface $Document {
   selected: string;
   actions: {
     DisconnectLine: (
-      p: {
-        lineId: string;
-        noteId: string;
-        projectId: string;
-      },
+      p: { lineId: string; noteId: string; projectId: string },
     ) => void;
-    ConnectNote: (
-      p: {
-        b1: string;
-        b2: string;
-        projectId: string;
-      },
-    ) => void;
+    ConnectNote: (p: { b1: string; b2: string; projectId: string }) => void;
     MoveNote: (
       p: {
         id: string;
@@ -77,26 +67,11 @@ interface $Document {
     MoveDelta: (
       p: { id: string; dx: number; dy: number; projectId: string },
     ) => void;
-    UpdateNoteSize: (
-      p: {
-        id: string;
-        h: number;
-        w: number;
-      },
-    ) => void;
+    UpdateNoteSize: (p: { id: string; h: number; w: number }) => void;
     UpdateNoteText: (
-      p: {
-        id: string;
-        name: string;
-        projectId: string;
-      },
+      p: { id: string; name: string; projectId: string },
     ) => void;
-    RemoveNote: (
-      p: {
-        id: string;
-        projectId: string;
-      },
-    ) => void;
+    RemoveNote: (p: { id: string; projectId: string }) => void;
   };
   localBoxById: { [id: string]: { h: number; w: number; isNew: boolean } };
 }
@@ -260,18 +235,9 @@ type $FbDocuments = { docId: string } & RenderProps<
       p: { id: string; x: number; y: number; dx: number; dy: number },
     ) => void;
     UpdateNoteText: (
-      p: {
-        id: string;
-        name: string;
-        projectId: string;
-      },
+      p: { id: string; name: string; projectId: string },
     ) => void;
-    RemoveNote: (
-      p: {
-        id: string;
-        projectId: string;
-      },
-    ) => void;
+    RemoveNote: (p: { id: string; projectId: string }) => void;
   }
 >;
 class FbDocuments extends React.Component<$FbDocuments, fbState> {
