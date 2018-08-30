@@ -1,5 +1,5 @@
 import * as React from "react";
-import { BrowserRouter, Route } from "react-router-dom";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
 import firebase from "firebase";
 import { Auth } from "./Auth";
 import { Toolbar } from "./Toolbar";
@@ -9,6 +9,7 @@ import { State, Value } from "react-powerplug";
 import styled from "react-emotion";
 import "./globalStyles";
 import { Documents } from "./Documents";
+import Storybook from "./storybook";
 const Input = styled("input")`
   height: 64px;
   width: 100%;
@@ -50,15 +51,23 @@ const SignIn = ({ signIn }: { signIn: () => void }) => (
 );
 const App = () => (
   <BrowserRouter>
-    <Auth>
-      {({ loggedIn, user, signIn, signOut }) =>
-        loggedIn ? (
-          <Home user={user} signOut={signOut} />
-        ) : (
-          <SignIn signIn={signIn} />
-        )
-      }
-    </Auth>
+    <Switch>
+      <Route path="/storybook" component={Storybook} />
+      <Route
+        path="/"
+        component={() => (
+          <Auth>
+            {({ loggedIn, user, signIn, signOut }) =>
+              loggedIn ? (
+                <Home user={user} signOut={signOut} />
+              ) : (
+                <SignIn signIn={signIn} />
+              )
+            }
+          </Auth>
+        )}
+      />
+    </Switch>
   </BrowserRouter>
 );
 
