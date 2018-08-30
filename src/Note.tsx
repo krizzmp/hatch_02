@@ -9,7 +9,7 @@ import { TodoStyle } from "./TodoStyles";
 import styled from "react-emotion";
 import { colors } from "./colors";
 
-let cuid = require("cuid");
+import cuid from "cuid";
 const DefaultText = styled("div")(
   {
     paddingRight: "1.5ch",
