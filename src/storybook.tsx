@@ -18,7 +18,7 @@ export default class storybook extends React.Component {
             <input type="text" placeholder="create new document" />
             <button onClick={() => {}}>+</button>
           </div>
-
+          test
           {documents.map(({ key, value: { name } }) => (
             <div key={key}>
               <Link to={`/documents/${key}`}>{name}</Link>
