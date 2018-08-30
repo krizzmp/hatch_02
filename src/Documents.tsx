@@ -17,7 +17,6 @@ const SListItem = styled("div")`
 const SList = styled("div")`
   border: 1px solid ${bdColor};
   margin: 8px;
-  /* border-radius: 4px; */
 `;
 const SLink = styled(Link)`
   font-size: 14px;
