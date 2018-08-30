@@ -251,7 +251,7 @@ class FbDocuments extends React.Component<$FbDocuments, fbState> {
   };
   t: firebase.database.Reference;
   componentWillMount = () => {
-    this.t = app.database().ref(`${this.props.docId}`);
+    this.t = app.database().ref(`documents/${this.props.docId}`);
     this.t.on("value", (snap) => {
       this.setState({ document: snap.val() });
     });
@@ -283,7 +283,7 @@ class FbDocuments extends React.Component<$FbDocuments, fbState> {
     );
     app
       .database()
-      .ref(`${this.props.docId}/todos/${id}`)
+      .ref(`documents/${this.props.docId}/todos/${id}`)
       .set({
         id,
         name: "new note",
@@ -296,7 +296,7 @@ class FbDocuments extends React.Component<$FbDocuments, fbState> {
   MoveDelta = ({ id, dx, dy }) => {
     app
       .database()
-      .ref(`${this.props.docId}/todos/${id}`)
+      .ref(`documents/${this.props.docId}/todos/${id}`)
       .update({
         dx,
         dy,
@@ -305,7 +305,7 @@ class FbDocuments extends React.Component<$FbDocuments, fbState> {
   MoveNote = ({ id, x, y, dx, dy }) => {
     app
       .database()
-      .ref(`${this.props.docId}/todos/${id}`)
+      .ref(`documents/${this.props.docId}/todos/${id}`)
       .update({
         x: x + dx,
         y: y + dy,
@@ -317,21 +317,21 @@ class FbDocuments extends React.Component<$FbDocuments, fbState> {
     let newLine = { id: cuid(), b1, b2 };
     app
       .database()
-      .ref(`${this.props.docId}/lines/${newLine.id}`)
+      .ref(`documents/${this.props.docId}/lines/${newLine.id}`)
       .set(newLine);
     app
       .database()
-      .ref(`${this.props.docId}/todos/${b2}`)
+      .ref(`documents/${this.props.docId}/todos/${b2}`)
       .update({ dx: 0, dy: 0 });
   };
   DisconnectLine = ({ lineId, noteId }) => {
     app
       .database()
-      .ref(`${this.props.docId}/lines/${lineId}`)
+      .ref(`documents/${this.props.docId}/lines/${lineId}`)
       .remove();
     app
       .database()
-      .ref(`${this.props.docId}/todos/${noteId}`)
+      .ref(`documents/${this.props.docId}/todos/${noteId}`)
       .update({ dx: 0, dy: 0 });
   };
   RemoveNote = ({ id: noteId }) => {
@@ -341,18 +341,18 @@ class FbDocuments extends React.Component<$FbDocuments, fbState> {
       .forEach((line) => {
         app
           .database()
-          .ref(`${this.props.docId}/lines/${line.id}`)
+          .ref(`documents/${this.props.docId}/lines/${line.id}`)
           .remove();
       });
     app
       .database()
-      .ref(`${this.props.docId}/todos/${noteId}`)
+      .ref(`documents/${this.props.docId}/todos/${noteId}`)
       .remove();
   };
   UpdateNoteText = ({ name, id }) => {
     app
       .database()
-      .ref(`${this.props.docId}/todos/${id}`)
+      .ref(`documents/${this.props.docId}/todos/${id}`)
       .update({ name });
     this.setState((s) =>
       R.mergeDeepRight(s, {
