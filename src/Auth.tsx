@@ -1,4 +1,4 @@
-import firebase from "firebase";
+import firebase from "firebase/app";
 import { app } from "./firebase-init";
 import React from "react";
 var provider = new firebase.auth.GoogleAuthProvider();

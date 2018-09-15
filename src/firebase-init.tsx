@@ -1,4 +1,4 @@
-import firebase from "firebase";
+import firebase from "firebase/app";
 export var app = firebase.initializeApp({
   apiKey: "AIzaSyBPylKIFAdjNJ1OVGNTl_bSj6NTdeE2tKY",
   authDomain: "hatch01-9b51a.firebaseapp.com",

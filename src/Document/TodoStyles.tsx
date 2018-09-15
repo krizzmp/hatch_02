@@ -1,8 +1,6 @@
 import styled from "react-emotion";
-import { colors } from "./colors";
-
+import { colors } from "../colors";
 import tinycolor from "tinycolor2";
-
 const umbraMap = {
   "0": "0px 0px 0px 0px",
   "1": "0px 2px 1px -1px",
@@ -30,7 +28,6 @@ const umbraMap = {
   "23": "0px 11px 14px -7px",
   "24": "0px 11px 15px -7px",
 };
-
 const penumbraMap = {
   "0": "0px 0px 0px 0px",
   "1": "0px 1px 1px 0px",
@@ -58,7 +55,6 @@ const penumbraMap = {
   "23": "0px 23px 36px 3px",
   "24": "0px 24px 38px 3px",
 };
-
 const ambientMap = {
   "0": "0px 0px 0px 0px",
   "1": "0px 1px 3px 0px",
@@ -86,11 +82,9 @@ const ambientMap = {
   "23": "0px 9px 44px 8px",
   "24": "0px 9px 46px 8px",
 };
-
 const umbraOpacity = 0.2;
 const penumbraOpacity = 0.14;
 const ambientOpacity = 0.12;
-
 export default function elevate(
   zValue: number,
   color: string = "black",
@@ -99,7 +93,6 @@ export default function elevate(
   const umbraZValue = umbraMap[zValue];
   const penumbraZValue = penumbraMap[zValue];
   const ambientZValue = ambientMap[zValue];
-
   const shadowColor = tinycolor(color);
   const umbraColor = shadowColor
     .setAlpha(umbraOpacity + opacityBoost)
@@ -110,10 +103,8 @@ export default function elevate(
   const ambientColor = shadowColor
     .setAlpha(ambientOpacity + opacityBoost)
     .toRgbString();
-
   return `${umbraZValue} ${umbraColor}, ${penumbraZValue} ${penumbraColor}, ${ambientZValue} ${ambientColor}`;
 }
-
 export const TodoStyle = styled("div")(
   {
     position: "absolute",

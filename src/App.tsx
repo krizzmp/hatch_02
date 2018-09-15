@@ -1,52 +1,59 @@
 import * as React from "react";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
-import firebase from "firebase";
+// import firebase from "firebase";
+import firebase from "firebase/app";
+// These imports load individual services into the firebase namespace.
+import "firebase/auth";
+import "firebase/database";
 import { Auth } from "./Auth";
-import { Toolbar } from "./Toolbar";
-import { UserMenu } from "./UserMenu";
-import { Document } from "./Document";
-import { State, Value } from "react-powerplug";
-import styled from "react-emotion";
+import { Document } from "./Document/FbDocument";
+import { css } from "react-emotion";
 import "./globalStyles";
-import { Documents } from "./Documents";
+import { Documents } from "./Documents/Documents";
 import Storybook from "./storybook";
-const Input = styled("input")`
-  height: 64px;
-  width: 100%;
-  border: none;
-  color: white;
-  font-size: 32px;
-  padding-left: 16px;
-  border-bottom: 1px solid transparent;
-  outline: none;
-  background: #2c4cc1;
-  &:focus {
-    border-bottom-color: #506fe2;
-  }
-`;
+import { AppBar, Toolbar, IconButton, Typography } from "@material-ui/core";
+import MenuIcon from "@material-ui/icons/Menu";
+import { SignIn } from "./SignIn";
+import { UserAvatar } from "./UserAvatar";
 interface $Home {
   user: firebase.User;
   signOut: () => void;
 }
 const Home = ({ user, signOut }: $Home) => (
   <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-    <Toolbar
-      left={<span>logo</span>}
-      middle={<span>{user.displayName}</span>}
-      right={<UserMenu user={user} signOut={signOut} />}
+    <Route
+      render={() => {
+        return (
+          <AppBar position="static">
+            <Toolbar>
+              <IconButton
+                style={{
+                  marginLeft: -20,
+                  marginRight: 20,
+                }}
+                color="inherit"
+                aria-label="Menu"
+              >
+                <MenuIcon />
+              </IconButton>
+              <Typography
+                variant="title"
+                color="inherit"
+                className={css({ flexGrow: 1 })}
+              >
+                Hatch
+              </Typography>
+              <UserAvatar user={user} signOut={signOut} />
+            </Toolbar>
+          </AppBar>
+        );
+      }}
     />
-    <Route exact path="/" component={() => <Documents user={user} />} />
+    <Documents user={user} />
     <Route
       path="/documents/:id"
       component={(p) => <Document id={p.match.params.id} />}
     />
-  </div>
-);
-
-const SignIn = ({ signIn }: { signIn: () => void }) => (
-  <div>
-    you are not logged in
-    <button onClick={signIn}>sign in with Google</button>
   </div>
 );
 const App = () => (
@@ -57,12 +64,8 @@ const App = () => (
         path="/"
         component={() => (
           <Auth>
-            {({ loggedIn, user, signIn, signOut }) =>
-              loggedIn ? (
-                <Home user={user} signOut={signOut} />
-              ) : (
-                <SignIn signIn={signIn} />
-              )
+            {({ loggedIn, user, signOut }) =>
+              loggedIn ? <Home user={user} signOut={signOut} /> : <SignIn />
             }
           </Auth>
         )}
@@ -70,5 +73,4 @@ const App = () => (
     </Switch>
   </BrowserRouter>
 );
-
 export default App;

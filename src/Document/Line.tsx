@@ -1,10 +1,9 @@
 import * as React from "react";
 import styled from "react-emotion";
 import { ofValues } from "ix/iterable/ofvalues";
-import { LineType, TodoType } from "./Document";
+import { LineType, TodoType } from "./FbDocument";
 import * as Ix from "ix";
-import { colors } from "./colors";
-
+import { colors } from "../colors";
 export function getConnectedLine(
   lines: {
     [id: string]: LineType;
