@@ -5,7 +5,7 @@ import PersonIcon from "@material-ui/icons/Person";
 export const UserAvatar = ({ user, signOut }) => (
   <Value initial={null}>
     {({ value: anchorEl, set }) => (
-      <React.Fragment>
+      <div>
         {user.photoURL ? (
           <Avatar
             src={user.photoURL}
@@ -37,7 +37,7 @@ export const UserAvatar = ({ user, signOut }) => (
             sign out
           </MenuItem>
         </Menu>
-      </React.Fragment>
+      </div>
     )}
   </Value>
 );
