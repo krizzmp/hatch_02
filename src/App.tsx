@@ -1,8 +1,6 @@
 import * as React from "react";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
-// import firebase from "firebase";
 import firebase from "firebase/app";
-// These imports load individual services into the firebase namespace.
 import "firebase/auth";
 import "firebase/database";
 import { Auth } from "./Auth";
