@@ -27,7 +27,7 @@ export class Files extends React.Component<FilesProps, any> {
         <Toolbar>
           <Typography variant="title">Files</Typography>
         </Toolbar>
-        <Table title="test">
+        <Table title="Files">
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
