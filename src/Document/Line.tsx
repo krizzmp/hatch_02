@@ -9,7 +9,7 @@ export function getConnectedLine(
     [id: string]: LineType;
   },
   b1: string,
-  b2: string,
+  b2: string
 ) {
   let isConnected = (line: LineType) =>
     (line.b1 === b1 && line.b2 === b2) || (line.b1 === b2 && line.b2 === b1);
@@ -18,6 +18,12 @@ export function getConnectedLine(
     .first();
   return g;
 }
+
+type LocalBoxType = {
+  w: number;
+  h: number;
+};
+
 interface $Line {
   b1: TodoType;
   b2: TodoType;
@@ -28,14 +34,8 @@ interface $Line {
   todosRaw: {
     [id: string]: TodoType;
   };
-  localBox1: {
-    w: number;
-    h: number;
-  };
-  localBox2: {
-    w: number;
-    h: number;
-  };
+  localBox1: LocalBoxType;
+  localBox2: LocalBoxType;
 }
 class Vector2d {
   y: number;
@@ -59,17 +59,11 @@ type point = {
 const vec = (pos1: point, pos2: point): Vector2d => {
   return new Vector2d(pos1, pos2);
 };
-let centerPos = (
-  b: TodoType,
-  lb: {
-    w: number;
-    h: number;
-  },
-) => ({
+let centerPos = (b: TodoType, lb: LocalBoxType) => ({
   ...b,
   x: b.x + b.dx + (lb.w ? lb.w / 2 : 0),
   y: b.y + b.dy + (lb.h ? lb.h / 2 : 0),
-  ...lb,
+  ...lb
 });
 function srty<
   T extends {
@@ -96,6 +90,14 @@ function srtx<
 function notNull<T>(cat: T): cat is Exclude<typeof cat, undefined | null> {
   return cat !== null && cat !== undefined;
 }
+
+function boxEquals(b1: TodoType, b2: TodoType) {
+  return b1.dx != b2.dx || b1.dy != b2.dy || b1.x != b2.x || b1.y != b2.y;
+}
+function localBoxEquals(b1: LocalBoxType, b2: LocalBoxType) {
+  return b1.w != b2.w || b1.h != b2.h;
+}
+
 export class Line extends React.Component<$Line> {
   private gap = 8;
   private getBoxes = () => {
@@ -109,48 +111,62 @@ export class Line extends React.Component<$Line> {
     let [b, t] = srty(n1, n2);
     let left = {
       x: l.x + l.i * this.gap,
-      y: t.y + t.h / 2,
+      y: t.y + t.h / 2
     };
     let right = {
       x: r.x + r.i * this.gap,
-      y: b.y - b.h / 2,
+      y: b.y - b.h / 2
     };
     let bottom = {
       x: b.x + b.i * this.gap,
-      y: b.y - b.h / 2,
+      y: b.y - b.h / 2
     };
     let top = {
       x: t.x + t.i * this.gap,
-      y: t.y + t.h / 2,
+      y: t.y + t.h / 2
     };
     return { left, right, bottom, top };
   };
   private getConnectedBoxes = (box: TodoType, otherBox: TodoType) => {
     let el = Ix.Iterable.from(ofValues(this.props.linesRaw))
-      .map((l) => (l.b1 === box.id ? l.b2 : l.b2 === box.id ? l.b1 : null))
+      .map(l => (l.b1 === box.id ? l.b2 : l.b2 === box.id ? l.b1 : null))
       .filter(notNull)
-      .map((id) => this.props.todosRaw[id])
-      .partition((b) => b.y < box.y)
-      .map((o) =>
+      .map(id => this.props.todosRaw[id])
+      .partition(b => b.y < box.y)
+      .map(o =>
         o
-          .map((p) => {
+          .map(p => {
             let ang = vec(p, box).angle();
             return {
               angle: ang > 0 ? ang : ang * -1,
-              box: p,
+              box: p
             };
           })
-          .orderBy((a) => a.angle)
+          .orderBy(a => a.angle)
           .map((x, i) => ({
             index: i,
             el: x.box,
-            count: o.count(),
+            count: o.count()
           }))
-          .find((x) => x.el.id === otherBox.id),
+          .find(x => x.el.id === otherBox.id)
       )
       .filter(notNull)[0];
     return el.index - (el.count - 1) / 2;
   };
+  shouldComponentUpdate(
+    nextProps: Readonly<$Line>,
+    nextState: Readonly<{}>,
+    nextContext: any
+  ): boolean {
+    // todo: make sure to update when a connected box is changed or something
+    return (
+      boxEquals(nextProps.b1, this.props.b1) ||
+      boxEquals(nextProps.b2, this.props.b2) ||
+      localBoxEquals(nextProps.localBox1, this.props.localBox1) ||
+      localBoxEquals(nextProps.localBox2, this.props.localBox2)
+    );
+  }
+
   render() {
     return (
       <React.Fragment>
@@ -169,7 +185,7 @@ export class Line extends React.Component<$Line> {
       top: top.y,
       position: "absolute",
       display: "inline-block",
-      width: 1,
+      width: 1
     };
   });
   MiddleLine = styled("div")(() => {
@@ -181,7 +197,7 @@ export class Line extends React.Component<$Line> {
       top: top.y + (bottom.y - top.y) / 2,
       position: "absolute",
       display: "inline-block",
-      width: right.x - left.x,
+      width: right.x - left.x
     };
   });
   LowerLine = styled("div")(() => {
@@ -193,7 +209,7 @@ export class Line extends React.Component<$Line> {
       top: top.y + (bottom.y - top.y) / 2,
       position: "absolute",
       display: "inline-block",
-      width: 1,
+      width: 1
     };
   });
 }

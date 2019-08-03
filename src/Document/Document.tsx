@@ -4,11 +4,12 @@ import { ofValues } from "ix/iterable/ofvalues";
 import { Line, getConnectedLine } from "./Line";
 import { Note } from "./Note";
 import { HotKeys } from "react-hotkeys";
-import cuid from "cuid";
+import cuid = require('cuid');
 import { TodoType, LineType, FbDocActions } from "./FbDocument";
 import styled from "react-emotion";
 import Ix from "ix";
 import * as R from "ramda";
+
 const styles = {
   Canvas: styled("div")`
     overflow: hidden;
@@ -21,9 +22,7 @@ const styles = {
     left: 50%;
     top: 50%;
     position: relative;
-    transform: ${({ dx, dy }: { dx: number; dy: number }) =>
-      `translate(${dx}px, ${dy}px) scale(1, 1)`};
-  `,
+  `
 };
 interface $Document {
   linesRaw: { [id: string]: LineType };
@@ -32,21 +31,24 @@ interface $Document {
   actions: FbDocActions;
   localBoxById: { [id: string]: { h: number; w: number; isNew: boolean } };
 }
-export class Document2 extends React.Component<$Document> {
-  state = {
+
+type $state = {
+  draggingInitPos: { x: number; y: number } | undefined;
+  dragging: TodoType | undefined;
+  dx: number;
+  dy: number;
+};
+
+export class Document2 extends React.Component<$Document, $state> {
+  state: $state = {
     dx: 0,
     dy: 0,
-    dragging: undefined as TodoType | undefined,
-    draggingInitPos: undefined as
-      | {
-          x: number;
-          y: number;
-        }
-      | undefined,
+    dragging: undefined,
+    draggingInitPos: undefined
   };
-  $center?: Element;
+  $center?: HTMLDivElement;
   Lines = () => {
-    return Ix.Iterable.from(ofValues(this.props.linesRaw)).map((line) => (
+    return Ix.Iterable.from(ofValues(this.props.linesRaw)).map(line => (
       <Line
         key={line.id}
         id={line.id}
@@ -60,7 +62,7 @@ export class Document2 extends React.Component<$Document> {
     ));
   };
   Notes = () => {
-    return Ix.Iterable.from(ofValues(this.props.todosRaw)).map((todo) => (
+    return Ix.Iterable.from(ofValues(this.props.todosRaw)).map(todo => (
       <Note
         key={todo.id}
         todo={todo}
@@ -73,7 +75,7 @@ export class Document2 extends React.Component<$Document> {
           UpdateNoteSize: this.props.actions.UpdateNoteSize,
           CreateNote: this.props.actions.CreateNote,
           RemoveNote: this.props.actions.RemoveNote,
-          UpdateNoteText: this.props.actions.UpdateNoteText,
+          UpdateNoteText: this.props.actions.UpdateNoteText
         }}
       />
     ));
@@ -81,7 +83,7 @@ export class Document2 extends React.Component<$Document> {
   dragStart = (e: React.DragEvent<HTMLDivElement>, todo: TodoType) => {
     this.setState({
       dragging: todo,
-      draggingInitPos: { x: e.clientX, y: e.clientY },
+      draggingInitPos: { x: e.clientX, y: e.clientY }
     });
   };
   onDragEnd = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -98,7 +100,7 @@ export class Document2 extends React.Component<$Document> {
       if (connectedLine) {
         this.props.actions.DisconnectLine({
           lineId: connectedLine.id,
-          noteId: b2,
+          noteId: b2
         });
       } else {
         this.props.actions.ConnectNote({ b1, b2 });
@@ -127,18 +129,41 @@ export class Document2 extends React.Component<$Document> {
     }
   };
   pan = (e: React.WheelEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    this.setState({
-      dy: this.state.dy + e.deltaY * -1,
-      dx: this.state.dx + e.deltaX * -1,
-    });
+    this.setState(
+      {
+        dy: this.state.dy + e.deltaY * -1,
+        dx: this.state.dx + e.deltaX * -1
+      },
+      () => {
+        this.$center.style.transform = `translate(${this.state.dx}px, ${
+          this.state.dy
+        }px) scale(1, 1)`;
+      }
+    );
   };
+  shouldComponentUpdate(
+    nextProps: Readonly<$Document>,
+    nextState: Readonly<$state>,
+    nextContext: any
+  ): boolean {
+    if (nextProps != this.props) {
+      return true;
+    }
+    if (
+      this.state.dragging != nextState.dragging ||
+      this.state.draggingInitPos != nextState.draggingInitPos
+    ) {
+      return true;
+    }
+    return false;
+  }
+
   render() {
     return (
       <HotKeys
         keyMap={{
           remove: ["del", "command+backspace"],
-          shiftie: "shift+return",
+          shiftie: "shift+return"
         }}
         className={css({ flex: 1, display: "flex" })}
       >
@@ -161,7 +186,7 @@ export class Document2 extends React.Component<$Document> {
                 textAlign: "center",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
+                justifyContent: "center"
               })}
             >
               <div
@@ -169,7 +194,7 @@ export class Document2 extends React.Component<$Document> {
                   userSelect: "none",
                   fontSize: "10px",
                   color: "#000000DF",
-                  fontFamily: "roboto",
+                  fontFamily: "roboto"
                 })}
               >
                 Double click on this canvas to create a note.
@@ -178,11 +203,7 @@ export class Document2 extends React.Component<$Document> {
               </div>
             </div>
           ) : null}
-          <styles.Center
-            innerRef={(ref) => (this.$center = ref)}
-            dy={this.state.dy}
-            dx={this.state.dx}
-          >
+          <styles.Center innerRef={ref => (this.$center = ref)}>
             {this.Lines()}
             {this.Notes()}
           </styles.Center>

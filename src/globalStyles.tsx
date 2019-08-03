@@ -9,6 +9,7 @@ injectGlobal`
     -webkit-font-smoothing: antialiased;
   }
   body {
+  overscroll-behavior: none;
   margin: 0;
   padding: 0;
   font-family: Menlo, Monaco, Consolas, "Lucida Console", monospace;

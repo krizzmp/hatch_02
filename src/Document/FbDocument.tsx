@@ -4,7 +4,7 @@ import * as Ix from "ix";
 import { RenderProps } from "../Auth";
 import { app } from "../firebase-init";
 import * as R from "ramda";
-import cuid from "cuid";
+import cuid = require("cuid");
 import { Document2 } from "./Document";
 import { css } from "emotion";
 export interface TodoType {
